@@ -1,6 +1,5 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Raydium } from '@raydium-io/raydium-sdk-v2';
-import { loadEnvironment } from '../config/environment';
 import { SOLANA_COMMITMENT } from '../config/constants';
 import { createLogger } from '../utils/logger';
 import { PredatorError, PredatorErrorCode } from '../types/system.types';

@@ -21,6 +21,7 @@ export function createRedisConnection(): IORedis {
     password: config.REDIS_PASSWORD || undefined,
     maxRetriesPerRequest: null, // Required by BullMQ
     enableReadyCheck: true,
+    family: 4,
     retryStrategy(retryAttempt: number): number | null {
       if (retryAttempt > 10) {
         logger.fatal({ retryAttempt }, 'Redis connection exhausted all retries');

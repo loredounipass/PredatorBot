@@ -1,7 +1,7 @@
 import { ObjectId, type InsertOneResult } from 'mongodb';
 import { getMongoDb } from './mongo.client';
 import { createPendingTradeDocument, type TradeDocument } from './trade.schema';
-import type { TradeDirection } from '../types/trade.types';
+import type { TradeDirection, TradeStatus } from '../types/trade.types';
 import { createLogger } from '../utils/logger';
 
 const logger = createLogger('TradeRepository');
@@ -127,7 +127,7 @@ export async function findTradeByJobId(
  */
 export async function findRecentTrades(
   maxResults: number = 50,
-  statusFilter?: string
+  statusFilter?: TradeStatus
 ): Promise<TradeDocument[]> {
   const query = statusFilter ? { status: statusFilter } : {};
 
