@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  # ═══════════════════════════════════════════════
+  # 🔴 Redis — In-Memory Message Broker & State Store
+  # ═══════════════════════════════════════════════
+  redis:
+    image: redis:7-alpine
+    container_name: predator-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ═══════════════════════════════════════════════
+  # 🟢 MongoDB — Persistent Analytics & Ledger
+  # ═══════════════════════════════════════════════
+  mongodb:
+    image: mongo:7
+    container_name: predator-mongodb
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: PredatorBot_Ledger
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  redis_data:
+    driver: local
+  mongo_data:
+    driver: local
