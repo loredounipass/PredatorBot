@@ -2,24 +2,33 @@
 // Pool Reserve Snapshot
 // ═══════════════════════════════════════════════
 
-/** Raw reserve data decoded from Raydium AMM pool account */
+import type { VenueType } from './trade.types';
+
+/** Raw reserve data decoded from a pool / bonding-curve account */
 export interface PoolReserves {
   readonly baseReserve: bigint;   // Token reserve in smallest unit
   readonly quoteReserve: bigint;  // SOL reserve in lamports
-  readonly lpSupply: bigint;      // Total LP token supply
-  readonly poolOpenTime: number;  // Unix timestamp — when pool became active
+  readonly lpSupply: bigint;      // Total LP token supply (0 when N/A, e.g. bonding curve)
+  readonly poolOpenTime: number;  // Unix timestamp — when pool became active (0 when unknown)
 }
 
 // ═══════════════════════════════════════════════
 // Liquidity Snapshot — Timestamped Pool State
 // ═══════════════════════════════════════════════
 
-/** Point-in-time snapshot of a Raydium pool's liquidity state */
+/** Point-in-time snapshot of a pool / bonding curve's liquidity state */
 export interface LiquiditySnapshot {
   readonly poolId: string;
   readonly tokenMint: string;
+  readonly venue: VenueType;
   readonly reserves: PoolReserves;
   readonly fetchedAt: number; // Unix timestamp ms
+  /**
+   * Bonding-curve graduation flag (Pump.fun only).
+   * true = curve complete → token migrated to PumpSwap, curve is dead.
+   * undefined for non-pumpfun venues.
+   */
+  readonly complete?: boolean;
 }
 
 // ═══════════════════════════════════════════════
@@ -42,6 +51,7 @@ export interface SwapSimulationResult {
 export interface SwapExecutionParams {
   readonly poolId: string;
   readonly tokenMint: string;
+  readonly venue: VenueType;
   readonly amountIn: bigint;
   readonly minimumAmountOut: bigint;
   readonly slippageBps: number;

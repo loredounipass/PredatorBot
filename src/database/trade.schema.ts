@@ -1,4 +1,4 @@
-import type { TradeDirection, TradeStatus } from '../types/trade.types';
+import type { TradeDirection, TradeStatus, VenueType } from '../types/trade.types';
 
 // ═══════════════════════════════════════════════
 // MongoDB Document Shape — Trades Collection
@@ -12,6 +12,7 @@ export interface TradeDocument {
   jobId: string;
   tokenMint: string;
   poolId: string;
+  venue: VenueType;
   amountSol: number;
   direction: TradeDirection;
   status: TradeStatus;
@@ -33,12 +34,14 @@ export function createPendingTradeDocument(
   tokenMint: string,
   poolId: string,
   amountSol: number,
-  direction: TradeDirection
+  direction: TradeDirection,
+  venue: VenueType = 'raydium'
 ): TradeDocument {
   return {
     jobId,
     tokenMint,
     poolId,
+    venue,
     amountSol,
     direction,
     status: 'PENDING_ON_CHAIN',

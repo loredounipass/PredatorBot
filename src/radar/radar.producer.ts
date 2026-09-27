@@ -21,9 +21,12 @@ export async function enqueueTradePayload(signal: RadarSignal): Promise<void> {
   const payload: TradePayload = {
     tokenMint: signal.tokenMint,
     poolId: signal.poolId,
+    venue: signal.venue,
     amountSol: config.TRADE_AMOUNT_SOL,
     direction: signal.direction,
     detectedAt: signal.detectedAt,
+    sellAll: false,
+    buyMax: false,
   };
 
   // Runtime validation before enqueuing
@@ -54,6 +57,7 @@ export async function enqueueTradePayload(signal: RadarSignal): Promise<void> {
 
   logger.info(
     {
+      venue: payload.venue,
       tokenMint: payload.tokenMint,
       poolId: payload.poolId,
       direction: payload.direction,

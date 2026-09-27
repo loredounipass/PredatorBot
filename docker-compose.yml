@@ -10,7 +10,7 @@ services:
       - '6379:6379'
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass Pommeverte23
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy noeviction --requirepass Pommeverte23
     healthcheck:
       test: ['CMD', 'sh', '-c', 'redis-cli -a Pommeverte23 ping']
       interval: 10s
@@ -60,6 +60,8 @@ services:
       MONGO_DB_NAME: PredatorBot_Ledger
     env_file:
       - .env
+    ports:
+      - '3000:3000'
     command: ["node", "dist/main.js"]
     healthcheck:
       test: ['CMD', 'node', '-e', 'process.exit(0)']

@@ -1,7 +1,7 @@
 import { ObjectId, type InsertOneResult } from 'mongodb';
 import { getMongoDb } from './mongo.client';
 import { createPendingTradeDocument, type TradeDocument } from './trade.schema';
-import type { TradeDirection, TradeStatus } from '../types/trade.types';
+import type { TradeDirection, TradeStatus, VenueType } from '../types/trade.types';
 import { createLogger } from '../utils/logger';
 
 const logger = createLogger('TradeRepository');
@@ -13,25 +13,42 @@ const COLLECTION_NAME = 'trades';
 
 /**
  * Inserts a new trade in PENDING_ON_CHAIN status.
- * Returns the inserted document's _id for subsequent updates.
+ * Idempotent on BullMQ retries: if a document with the same jobId
+ * already exists, it is marked RETRYING and its _id is reused
+ * instead of throwing E11000.
+ * Returns the inserted (or existing) document's _id for subsequent updates.
  */
 export async function insertPendingTrade(
   jobId: string,
   tokenMint: string,
   poolId: string,
   amountSol: number,
-  direction: TradeDirection
+  direction: TradeDirection,
+  venue: VenueType = 'raydium'
 ): Promise<InsertOneResult> {
+  const collection = getMongoDb().collection<TradeDocument>(COLLECTION_NAME);
+
+  const existing = await collection.findOne({ jobId });
+  if (existing) {
+    await collection.updateOne({ jobId }, { $set: { status: 'RETRYING' } });
+    logger.info(
+      { jobId, tokenMint, direction, venue },
+      'Trade already exists — marked RETRYING, reusing document'
+    );
+    return {
+      acknowledged: true,
+      insertedId: existing._id,
+    } as unknown as InsertOneResult;
+  }
+
   const document = createPendingTradeDocument(
-    jobId, tokenMint, poolId, amountSol, direction
+    jobId, tokenMint, poolId, amountSol, direction, venue
   );
 
-  const result = await getMongoDb()
-    .collection<TradeDocument>(COLLECTION_NAME)
-    .insertOne(document);
+  const result = await collection.insertOne(document);
 
   logger.info(
-    { jobId, tokenMint, direction },
+    { jobId, tokenMint, direction, venue },
     'Trade pre-flight record inserted (PENDING_ON_CHAIN)'
   );
 

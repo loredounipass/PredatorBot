@@ -20,6 +20,20 @@ export const TARGET_TOKEN_MINT = new PublicKey(
 );
 
 // ═══════════════════════════════════════════════
+// Pump.fun / PumpSwap Protocol Addresses
+// ═══════════════════════════════════════════════
+
+/** Pump.fun bonding-curve program — pre-graduation trades live here */
+export const PUMP_PROGRAM_ID = new PublicKey(
+  '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P'
+);
+
+/** PumpSwap AMM program — graduated tokens trade here */
+export const PUMPSWAP_AMM_PROGRAM_ID = new PublicKey(
+  'pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA'
+);
+
+// ═══════════════════════════════════════════════
 // Solana Network Constants
 // ═══════════════════════════════════════════════
 
@@ -48,3 +62,9 @@ export const COMPUTE_UNIT_LIMIT = 200_000;
 
 /** Micro-lamports per compute unit for priority fee escalation */
 export const DEFAULT_PRIORITY_FEE_MICROLAMPORTS = 50_000;
+
+/**
+ * Reserva dejada en la wallet en compras MAX (BUY con todo el balance).
+ * Cubre fees de red + priority fee + posible creación de ATAs (~0.004 SOL).
+ */
+export const BUY_MAX_FEE_RESERVE_LAMPORTS = 10_000_000; // 0.01 SOL

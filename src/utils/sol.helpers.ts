@@ -63,3 +63,43 @@ export function truncateSignature(signature: string): string {
   if (signature.length <= 12) return signature;
   return `${signature.slice(0, 6)}...${signature.slice(-4)}`;
 }
+
+/**
+ * Reads a raw SPL token balance via getAccountInfo (non-indexed RPC).
+ *
+ * Uses getTokenAccountBalance internally would be simpler, but free
+ * public RPCs (e.g. publicnode) reject indexed methods with 403.
+ * getAccountInfo works everywhere: SPL Token Account layout holds
+ * the amount as u64 LE at offset 64 (mint[0..32] + owner[32..64]).
+ *
+ * Returns 0n when the account does not exist.
+ */
+export async function getSplBalanceRaw(
+  connection: import('@solana/web3.js').Connection,
+  tokenAccount: import('@solana/web3.js').PublicKey
+): Promise<bigint> {
+  const info = await connection.getAccountInfo(tokenAccount);
+
+  if (!info || !info.data || info.data.length < 72) return 0n;
+
+  return info.data.readBigUInt64LE(64);
+}
+
+/**
+ * Fetches the decimals of an SPL mint via parsed RPC account info.
+ *
+ * @param connection - Solana RPC connection
+ * @param mint - Mint public key
+ * @returns Number of decimals for token
+ */
+export async function fetchMintDecimals(
+  connection: import('@solana/web3.js').Connection,
+  mint: import('@solana/web3.js').PublicKey
+): Promise<number> {
+  const accountInfo = await connection.getParsedAccountInfo(mint);
+  const parsed = (accountInfo.value?.data as any)?.parsed;
+  if (!parsed || parsed.type !== 'mint' || parsed.info?.decimals === undefined) {
+    throw new Error(`Unable to fetch mint decimals for ${mint.toBase58()}`);
+  }
+  return Number(parsed.info.decimals);
+}

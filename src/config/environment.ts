@@ -31,6 +31,30 @@ const environmentSchema = z.object({
   JOB_MAX_RETRY_ATTEMPTS: z.coerce.number().int().min(0).max(10).default(3),
   JOB_RETRY_BACKOFF_MS: z.coerce.number().int().positive().default(500),
   PRIORITY_FEE_MICROLAMPORTS: z.coerce.number().int().nonnegative().default(50000),
+
+  // FOMO family criteria — which pump tokens the Radar accepts.
+  // A mint matches when ALL non-empty criteria match:
+  //   suffix    → mint ends with FOMO_MINT_SUFFIX (pump family; empty = any)
+  //   allowlist → mint is in FOMO_MINT_ALLOWLIST (empty = any)
+  //   creator   → token creator is in FOMO_CREATOR_ALLOWLIST (empty = any)
+  FOMO_MINT_SUFFIX: z.string().default('pump'),
+  FOMO_MINT_ALLOWLIST: z.string().default(''),
+  FOMO_CREATOR_ALLOWLIST: z.string().default(''),
+
+  // Graduation / verification gates (enforced in the worker, post-snapshot):
+  //   FOMO_TRADE_GRADUATED_ONLY → only trade graduated tokens (bonding curve
+  //     complete / PumpSwap pools). Requires PumpSwap decode support.
+  //   FOMO_ONLY_VERIFIED        → only trade mints in FOMO_MINT_ALLOWLIST.
+  //     There is no on-chain "verified" flag — the allowlist IS the
+  //     operator-curated verified set.
+  // NOTE: boolean env vars arrive as strings — "false" must parse to false,
+  // so plain z.coerce.boolean() (Boolean("false") === true) is wrong here.
+  FOMO_TRADE_GRADUATED_ONLY: z.string().default('false').transform(
+    (v) => v.trim().toLowerCase() === 'true' || v.trim() === '1'
+  ),
+  FOMO_ONLY_VERIFIED: z.string().default('false').transform(
+    (v) => v.trim().toLowerCase() === 'true' || v.trim() === '1'
+  ),
 });
 
 // ═══════════════════════════════════════════════
@@ -64,4 +88,24 @@ export function loadEnvironment(): EnvironmentConfig {
 
   cachedConfig = Object.freeze(parseResult.data);
   return cachedConfig;
+}
+
+/**
+ * Parses a comma-separated env list into trimmed, non-empty entries.
+ */
+export function parseCsvList(raw: string): string[] {
+  return raw
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+}
+
+/** Operator-curated verified set: empty array = no restriction. */
+export function getFomoMintAllowlist(): string[] {
+  return parseCsvList(loadEnvironment().FOMO_MINT_ALLOWLIST);
+}
+
+/** Trusted token creators: empty array = any creator accepted. */
+export function getFomoCreatorAllowlist(): string[] {
+  return parseCsvList(loadEnvironment().FOMO_CREATOR_ALLOWLIST);
 }

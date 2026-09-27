@@ -1,0 +1,36 @@
+:root { color-scheme: dark; }
+body { margin: 0; font-family: system-ui, sans-serif; background: #0b0e14; color: #e6edf3; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+.card { background: #131926; border: 1px solid #232d42; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+h1 { margin: 0 0 4px; font-size: 22px; }
+.muted { color: #8b98ad; font-size: 13px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+.field { flex: 1 1 220px; display: flex; flex-direction: column; gap: 6px; }
+label { font-size: 12px; color: #8b98ad; text-transform: uppercase; letter-spacing: 0.06em; }
+select, input { background: #0b0e14; color: #e6edf3; border: 1px solid #2b3a55; border-radius: 8px; padding: 10px; font-size: 14px; }
+button { background: #22c55e; color: #04120a; border: 0; border-radius: 8px; padding: 12px 18px; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.05s; }
+button:active { transform: translateY(1px); }
+button.sell { background: #ef4444; color: #fff; }
+button:disabled { opacity: 0.5; cursor: wait; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 8px; border-bottom: 1px solid #232d42; }
+.trades-wrap { max-height: 480px; overflow: auto; border-radius: 8px; border: 1px solid #232d42; }
+.trades-wrap table { border: none; }
+.trades-wrap thead th { position: sticky; top: 0; background: #131926; z-index: 1; }
+.pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+.ok { background: #052e16; color: #4ade80; }
+.bad { background: #450a0a; color: #fca5a5; }
+.warn { background: #451a03; color: #fdba74; }
+.error { color: #fca5a5; }
+
+/* Layout improvements */
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 800px) {
+  .grid { grid-template-columns: 1fr; }
+  .wrap { padding: 14px; }
+  h1 { font-size: 20px; }
+}
+.card h3 { margin: 0 0 12px; font-size: 16px; }
+.balance { font-size: 18px; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: #cbd5e1; }

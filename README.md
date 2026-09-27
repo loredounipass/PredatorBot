@@ -40,6 +40,9 @@ docker-compose down
 
 # Stop & wipe all data
 docker-compose down -v
+
+# Operar manual vía UI web (reemplaza al CLI eliminado)
+# Abre http://localhost:3000 — selector de token/pool, BUY/SELL, cantidad o MAX.
 ```
 
 ## Project Structure

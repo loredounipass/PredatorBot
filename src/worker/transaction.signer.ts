@@ -38,11 +38,21 @@ export async function signAndDispatchTransaction(
 
   logger.info('Transaction signed — dispatching to Solana network...');
 
+  // Capture blockhash context BEFORE send — reusing the same
+  // lastValidBlockHeight for confirmTransaction. Fetching it after
+  // send (previous behavior) mismatches on slow/public RPCs and
+  // causes spurious "block height exceeded" expiries.
+  const recentBlockhash = transaction.message.recentBlockhash;
+  const { lastValidBlockHeight } = await connection.getLatestBlockhash(
+    SOLANA_COMMITMENT
+  );
+
   try {
     // Send with skip preflight for speed (we already simulated)
     const txSignature = await connection.sendTransaction(transaction, {
       skipPreflight: true,
-      maxRetries: 2,
+      maxRetries: 5,
+      preflightCommitment: SOLANA_COMMITMENT,
     });
 
     logger.info(
@@ -50,14 +60,12 @@ export async function signAndDispatchTransaction(
       'Transaction dispatched — awaiting confirmation'
     );
 
-    // Wait for confirmation
+    // Wait for confirmation — reuse pre-send blockhash context
     const confirmation = await connection.confirmTransaction(
       {
         signature: txSignature,
-        blockhash: transaction.message.recentBlockhash,
-        lastValidBlockHeight: (
-          await connection.getLatestBlockhash(SOLANA_COMMITMENT)
-        ).lastValidBlockHeight,
+        blockhash: recentBlockhash,
+        lastValidBlockHeight,
       },
       SOLANA_COMMITMENT
     );

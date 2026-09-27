@@ -7,26 +7,36 @@
     "dev": "nodemon --exec ts-node src/main.ts",
     "start": "ts-node src/main.ts",
     "build": "tsc",
-    "start:prod": "node dist/main.js"
+    "start:prod": "node dist/main.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.95.0",
-    "@solana/spl-token": "^0.4.9",
     "@raydium-io/raydium-sdk-v2": "^0.1.95-alpha",
+    "@solana/spl-token": "^0.4.9",
+    "@solana/web3.js": "^1.95.0",
+    "bn.js": "^5.2.2",
+    "bs58": "^6.0.0",
     "bullmq": "^5.25.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
     "ioredis": "^5.4.1",
     "mongodb": "^6.10.0",
-    "dotenv": "^16.4.5",
-    "zod": "^3.23.8",
-    "bs58": "^6.0.0",
     "pino": "^9.5.0",
-    "pino-pretty": "^11.3.0"
+    "pino-pretty": "^11.3.0",
+    "ws": "^8.21.3",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "typescript": "^5.6.0",
-    "ts-node": "^10.9.2",
+    "@types/bn.js": "^5.1.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.9.0",
     "nodemon": "^3.1.7",
-    "@types/node": "^22.9.0"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
   },
   "engines": {
     "node": ">=20.0.0"

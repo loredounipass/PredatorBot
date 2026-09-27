@@ -12,6 +12,14 @@ COPY src ./src
 
 RUN pnpm run build
 
+# ── React UI build ──
+COPY ui/package.json ./ui/package.json
+COPY ui/vite.config.ts ./ui/vite.config.ts
+COPY ui/tsconfig.json ./ui/tsconfig.json
+COPY ui/index.html ./ui/index.html
+COPY ui/src ./ui/src
+RUN pnpm --dir ui install --no-frozen-lockfile --ignore-scripts && pnpm --dir ui build
+
 FROM node:20-alpine
 
 WORKDIR /app
@@ -25,6 +33,7 @@ COPY package.json ./
 RUN pnpm install --prod --no-frozen-lockfile --ignore-scripts
 
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/ui-dist ./ui-dist
 
 EXPOSE 3000
 

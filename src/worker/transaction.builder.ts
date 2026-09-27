@@ -16,7 +16,7 @@ const logger = createLogger('TransactionBuilder');
  * Assembles a VersionedTransaction with:
  *   1. Compute Budget instruction (priority fee + unit limit)
  *   2. Optional ATA creation instruction
- *   3. Swap instruction(s) from Raydium SDK
+ *   3. Swap instruction(s) from the venue SDK (Raydium / Pump.fun / PumpSwap)
  *
  * Uses V0 transaction format for Address Lookup Tables (ALT) compatibility.
  *
@@ -59,7 +59,7 @@ export async function buildSwapTransaction(
     instructions.push(ataInstruction);
   }
 
-  // 4. Swap instruction(s) from Raydium
+  // 4. Swap instruction(s) from the venue SDK
   instructions.push(...swapInstructions);
 
   // Compile into V0 message

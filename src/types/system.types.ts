@@ -41,6 +41,11 @@ export enum PredatorErrorCode {
   REDIS_UNAVAILABLE      = 'ERR_REDIS',
   WALLET_LOAD_FAILED     = 'ERR_WALLET',
   ENV_VALIDATION_FAILED  = 'ERR_ENV',
+  VENUE_UNSUPPORTED      = 'ERR_VENUE',
+  NOT_GRADUATED          = 'ERR_NOT_GRAD',
+  NOT_VERIFIED           = 'ERR_NOT_VERIFIED',
+  INVALID_INPUT          = 'ERR_INPUT',
+  PRICE_LIMIT_NOT_MET    = 'ERR_PRICE_LIMIT',
 }
 
 // ═══════════════════════════════════════════════

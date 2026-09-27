@@ -1,4 +1,5 @@
-import { loadEnvironment } from './config/environment';
+import { loadEnvironment, getFomoMintAllowlist } from './config/environment';
+import { TARGET_TOKEN_MINT } from './config/constants';
 import { createRedisConnection, disconnectRedis } from './config/redis.config';
 import { initMongoClient, disconnectMongo } from './database/mongo.client';
 import { initExecutionQueue, closeExecutionQueue } from './queue/queue.manager';
@@ -6,6 +7,7 @@ import { attachQueueEventHandlers } from './queue/queue.events';
 import { loadWalletKeypair } from './wallet/wallet.loader';
 import { spawnPredatorWorker, closePredatorWorker } from './worker/predator.worker';
 import { startRadarListener, stopRadarListener } from './radar/radar.listener';
+import { startApiServer } from './api/server';
 import { createLogger } from './utils/logger';
 
 const logger = createLogger('Main');
@@ -51,12 +53,21 @@ async function bootstrap(): Promise<void> {
   startRadarListener();
   logger.info('✔ Radar listener active');
 
+  // Step 8: HTTP API + React UI (replaces CLI for manual trades)
+  startApiServer();
+  logger.info('✔ API+UI server active');
+
   logger.info('═══════════════════════════════════════════');
   logger.info('   🟢 PredatorBot LIVE — Hunting Active');
-  logger.info(`   📡 Scanning Raydium V4 via Alchemy WSS`);
+  logger.info(`   📡 Scanning Raydium V4 + Pump.fun + PumpSwap via Alchemy WSS`);
   logger.info(`   💰 Trade Amount: ${config.TRADE_AMOUNT_SOL} SOL`);
   logger.info(`   📊 Max Slippage: ${config.MAX_SLIPPAGE_BPS} BPS`);
   logger.info(`   ⚡ Rate Limit: ${config.RATE_LIMIT_MAX_RPS} RPS`);
+  logger.info(`   🎯 Raydium target mint: ${TARGET_TOKEN_MINT.toBase58()}`);
+  logger.info(`   🎯 FOMO suffix: '${config.FOMO_MINT_SUFFIX || '(any)'}' | allowlist: ${getFomoMintAllowlist().length} mints | graduatedOnly: ${config.FOMO_TRADE_GRADUATED_ONLY} | onlyVerified: ${config.FOMO_ONLY_VERIFIED}`);
+  if (getFomoMintAllowlist().length > 0) {
+    logger.info({ allowlist: getFomoMintAllowlist() }, '   🎯 FOMO allowlist (only these pump mints trigger Radar)');
+  }
   logger.info('═══════════════════════════════════════════');
 }
 

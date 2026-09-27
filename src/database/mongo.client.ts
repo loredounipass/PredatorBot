@@ -43,14 +43,33 @@ export async function initMongoClient(): Promise<Db> {
 async function bootstrapIndexes(db: Db): Promise<void> {
   const tradesCollection = db.collection('trades');
 
+  // Migrate legacy sparse unique index on txSignature (indexed explicit
+  // nulls → E11000 on retries) to partial unique. createIndex won't
+  // replace an existing index with different options, so drop first.
+  try {
+    await tradesCollection.dropIndex('txSignature_1');
+  } catch {
+    // Index didn't exist — nothing to migrate
+  }
+
   await Promise.all([
     tradesCollection.createIndex({ tokenMint: 1 }),
-    tradesCollection.createIndex({ txSignature: 1 }, { unique: true, sparse: true }),
+    // Partial (not sparse): sparse still indexes explicit `null`, so
+    // BullMQ retries (multiple PENDING docs with txSignature: null)
+    // hit E11000. Partial only indexes real string signatures.
+    tradesCollection.createIndex(
+      { txSignature: 1 },
+      {
+        unique: true,
+        partialFilterExpression: { txSignature: { $type: 'string' } },
+      }
+    ),
     tradesCollection.createIndex({ status: 1, createdAt: -1 }),
     tradesCollection.createIndex({ jobId: 1 }, { unique: true }),
+    tradesCollection.createIndex({ venue: 1, status: 1 }),
   ]);
 
-  logger.info('MongoDB indexes bootstrapped (4 indexes on trades collection)');
+  logger.info('MongoDB indexes bootstrapped (5 indexes on trades collection)');
 }
 
 /**
